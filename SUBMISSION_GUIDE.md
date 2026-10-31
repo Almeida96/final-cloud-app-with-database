@@ -1,0 +1,59 @@
+# IBM / Coursera Final Project — Submission Guide
+
+This fork implements the assessment feature in the original IBM Django OnlineCourse app.
+
+## Run on your own computer
+
+Requirements: Python 3.10+, pip and internet access to install packages.
+
+From the repository root:
+
+    bash run_project.sh
+
+Or use the equivalent steps:
+
+    python3 -m venv .venv
+    source .venv/bin/activate
+    python -m pip install -r requirements.txt
+    python manage.py makemigrations onlinecourse
+    python manage.py migrate
+    python manage.py seed_demo
+    python manage.py check
+    python manage.py test
+    python manage.py runserver
+
+Open http://127.0.0.1:8000/onlinecourse/ for courses or http://127.0.0.1:8000/admin/ for the admin interface.
+
+Development-only accounts created by seed_demo:
+- Admin: demo_admin / admin12345
+- Student: demo_student / student12345
+
+**These are local demo passwords. Do not expose this configuration to the public internet.**
+
+## Seven answers in the assignment
+
+1. Models with Question, Choice and Submission: [models.py](onlinecourse/models.py)
+2. Admin configuration with QuestionInline, ChoiceInline, QuestionAdmin and LessonAdmin: [admin.py](onlinecourse/admin.py)
+3. Take a REAL screenshot named 03-admin-site.png after logging into the local Django admin. Show the "Authentication and Authorization" and "Onlinecourse" sections.
+4. Course details template with lessons and exam form: [course_details_bootstrap.html](onlinecourse/templates/onlinecourse/course_details_bootstrap.html)
+5. Grading views submit and show_exam_result: [views.py](onlinecourse/views.py)
+6. Submission/result paths: [urls.py](onlinecourse/urls.py)
+7. Take a REAL screenshot named 07-final.png after completing the seeded exam with 100%. Show Congratulations, score and exam feedback.
+
+When submitting, use the public GitHub link to the individual file (not the whole repository) for tasks 1, 2, 4, 5 and 6. Upload the two actual screenshots for tasks 3 and 7.
+
+## How to capture the successful result
+
+Log in as demo_student, open "Django & SQL Fundamentals", and select:
+- Models
+- SELECT
+- Creating database records AND Filtering database records
+- urls.py
+
+Click "Submit exam" to see Congratulations and 100.0%.
+
+## Important
+
+The original IBM lab expects you to understand and adapt the work as your own. Follow your course's academic-integrity rules, including any restrictions on submitting AI-generated code.
+
+The project has automated tests but they should be executed locally (or in GitHub Actions) before you make a claim of verified functionality. Never upload invented or manually edited screenshots.

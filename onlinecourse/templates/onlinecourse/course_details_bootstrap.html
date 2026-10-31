@@ -1,0 +1,65 @@
+{% extends 'onlinecourse/base.html' %}
+{% block title %}{{ course.name }} | OnlineCourse{% endblock %}
+{% block content %}
+  <div class="mb-4">
+    <a href="{% url 'onlinecourse:index' %}" class="small text-decoration-none">&larr; All courses</a>
+    <h1 class="mt-2">{{ course.name }}</h1>
+    <p class="text-muted fs-5">{{ course.description }}</p>
+  </div>
+
+  <section aria-labelledby="lessons-heading" class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="h4 mb-0" id="lessons-heading">Course lessons</h2>
+      <span class="badge text-bg-primary">{{ lessons|length }} lesson{{ lessons|length|pluralize }}</span>
+    </div>
+    {% for lesson in lessons %}
+      <article class="card shadow-sm border-0 mb-3">
+        <div class="card-body">
+          <span class="small text-muted">Lesson {{ forloop.counter }}</span>
+          <h3 class="h5">{{ lesson.title }}</h3>
+          <p class="mb-0">{{ lesson.content|linebreaksbr }}</p>
+        </div>
+      </article>
+    {% empty %}
+      <p class="text-muted">There are no lessons for this course yet.</p>
+    {% endfor %}
+  </section>
+
+  <section aria-labelledby="exam-heading" class="card border-0 shadow-sm">
+    <div class="card-body p-4">
+      <p class="text-uppercase fw-bold small text-primary mb-1">Knowledge check</p>
+      <h2 class="h4" id="exam-heading">Final assessment</h2>
+      <p class="text-muted">Pass mark: 70%</p>
+      {% if not user.is_authenticated %}
+        <div class="alert alert-info">Sign in before taking this exam.</div>
+        <a class="btn btn-primary" href="{% url 'onlinecourse:login' %}">Sign in</a>
+      {% elif not is_enrolled %}
+        <p class="text-muted">Enroll in this course to unlock the assessment.</p>
+        <form method="post" action="{% url 'onlinecourse:enroll' course.id %}">
+          {% csrf_token %}
+          <button class="btn btn-primary" type="submit">Enroll and start learning</button>
+        </form>
+      {% elif questions %}
+        <p class="text-muted">Select all correct answers. Some questions have multiple correct choices.</p>
+        <form id="questionform" method="post" action="{% url 'onlinecourse:submit' course.id %}">
+          {% csrf_token %}
+          {% for question in questions %}
+            <fieldset class="border rounded-3 p-3 mb-3">
+              <legend class="float-none w-auto px-2 fs-6 fw-bold">{{ forloop.counter }}. {{ question.question_text }}</legend>
+              <p class="small text-muted">{{ question.grade }} point{{ question.grade|pluralize }}</p>
+              {% for choice in question.choice_set.all %}
+                <div class="form-check mb-2">
+                  <input class="form-check-input" type="checkbox" name="choice" value="{{ choice.id }}" id="choice-{{ choice.id }}">
+                  <label class="form-check-label" for="choice-{{ choice.id }}">{{ choice.choice_text }}</label>
+                </div>
+              {% endfor %}
+            </fieldset>
+          {% endfor %}
+          <button type="submit" class="btn btn-success btn-lg">Submit exam</button>
+        </form>
+      {% else %}
+        <p class="text-muted">No exam questions have been added yet.</p>
+      {% endif %}
+    </div>
+  </section>
+{% endblock %}

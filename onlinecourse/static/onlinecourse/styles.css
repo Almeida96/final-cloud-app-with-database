@@ -1,0 +1,5 @@
+.course-cover { height: 190px; width: 100%; object-fit: cover; }
+.placeholder-art { background: linear-gradient(125deg, #dbeafe, #ede9fe); color: #394f91; font-weight: 700; }
+.auth-card { max-width: 480px; }
+.result-icon { font-size: 3rem; line-height: 1.5; }
+.score-pill { background: #eef5ff; border: 1px solid #c8dbff; border-radius: 40px; color: #154ea1; font-size: 2rem; font-weight: 700; max-width: 170px; padding: .5rem 1rem; }

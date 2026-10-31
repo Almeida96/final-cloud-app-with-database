@@ -13,3 +13,9 @@ An `onlinecourse` app has already been provided in this repo upon which you will
 For your reference, we have prepared the ER diagram design for the new assesement feature.
 
 ![Onlinecourse ER Diagram](https://github.com/ibm-developer-skills-network/final-cloud-app-with-database/blob/master/static/media/course_images/onlinecourse_app_er.png)
+
+## Completed assessment example
+
+This fork includes an implementation of Question, Choice and Submission models, admin inlines, student exam submission, scoring and result feedback.
+
+See [SUBMISSION_GUIDE.md](SUBMISSION_GUIDE.md) for setup, screenshots and exact assessment file links.
