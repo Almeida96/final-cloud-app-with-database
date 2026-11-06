@@ -15,12 +15,13 @@ Or use the equivalent steps:
     python3 -m venv .venv
     source .venv/bin/activate
     python -m pip install -r requirements.txt
-    python manage.py makemigrations onlinecourse
     python manage.py migrate
     python manage.py seed_demo
     python manage.py check
     python manage.py test
     python manage.py runserver
+
+The initial database migration is checked in. Run `makemigrations` only when changing models, and commit any generated migration with that change. CI verifies that the migration history matches the models.
 
 Open http://127.0.0.1:8000/onlinecourse/ for courses or http://127.0.0.1:8000/admin/ for the admin interface.
 
