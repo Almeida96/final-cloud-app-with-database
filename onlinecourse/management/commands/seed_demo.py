@@ -1,24 +1,31 @@
 """Local demo data for real screenshots and testing (never use on production)."""
 from django.contrib.auth import get_user_model
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
+from django.conf import settings
+from django.db import transaction
 from onlinecourse.models import Instructor, Learner, Course, Lesson, Enrollment, Question, Choice
 
 
 class Command(BaseCommand):
     help = 'Seed a sample course and temporary local admin/student accounts.'
 
+    @transaction.atomic
     def handle(self, *args, **options):
+        if not settings.DEBUG:
+            raise CommandError("Demo data is available only with DEBUG enabled.")
         User = get_user_model()
-        admin, _ = User.objects.get_or_create(username='demo_admin')
-        admin.is_staff = True
-        admin.is_superuser = True
-        admin.set_password('admin12345')
-        admin.save()
+        admin, created = User.objects.get_or_create(username='demo_admin')
+        if created:
+            admin.is_staff = True
+            admin.is_superuser = True
+            admin.set_password('admin12345')
+            admin.save()
 
-        student, _ = User.objects.get_or_create(username='demo_student')
-        student.first_name = 'Demo'
-        student.set_password('student12345')
-        student.save()
+        student, created = User.objects.get_or_create(username='demo_student')
+        if created:
+            student.first_name = 'Demo'
+            student.set_password('student12345')
+            student.save()
 
         instructor, _ = Instructor.objects.get_or_create(
             user=admin, defaults={'total_learners': 1}
@@ -70,5 +77,5 @@ class Command(BaseCommand):
                     defaults={'is_correct': is_correct},
                 )
         self.stdout.write(self.style.SUCCESS(
-            'Demo ready: admin=demo_admin/admin12345; student=demo_student/student12345'
+            'Demo data ready. Existing account passwords and privileges were preserved. See README for credentials of newly created demo accounts.'
         ))

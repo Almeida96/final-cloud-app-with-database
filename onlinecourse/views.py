@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
+from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views import generic
 from django.views.decorators.http import require_GET, require_POST
@@ -104,7 +105,10 @@ def submit(request, course_id):
         return HttpResponseForbidden('Enroll in the course before taking the exam.')
 
     raw_ids = request.POST.getlist('choice')
-    if not all(raw_id.isdecimal() for raw_id in raw_ids):
+    if len(raw_ids) > 1000 or not all(
+        raw_id.isascii() and raw_id.isdecimal() and len(raw_id) <= 18
+        for raw_id in raw_ids
+    ):
         return HttpResponseForbidden('Invalid choice identifier.')
     choice_ids = {int(value) for value in raw_ids}
     selected = list(Choice.objects.filter(
@@ -113,8 +117,11 @@ def submit(request, course_id):
     if len(selected) != len(choice_ids):
         return HttpResponseForbidden('Some selected choices are outside this exam.')
 
-    submission = Submission.objects.create(enrollment=enrollment)
-    submission.choices.set(selected)
+    with transaction.atomic():
+        submission = Submission.objects.create(
+            enrollment=enrollment, grading_snapshot=grade_exam(course, choice_ids)
+        )
+        submission.choices.set(selected)
     return redirect('onlinecourse:show_exam_result',
                     course_id=course.id, submission_id=submission.id)
 
@@ -122,13 +129,23 @@ def submit(request, course_id):
 @login_required
 @require_GET
 def show_exam_result(request, course_id, submission_id):
-    """Grade each question exactly once, including multi-select questions."""
+    """Display the saved assessment, or grade legacy attempts without snapshots."""
     course = get_object_or_404(Course, pk=course_id)
     submission = get_object_or_404(
         Submission, pk=submission_id,
         enrollment__user=request.user, enrollment__course=course,
     )
-    chosen_ids = set(submission.choices.values_list('id', flat=True))
+    snapshot = submission.grading_snapshot
+    if snapshot is None:
+        snapshot = grade_exam(course, set(submission.choices.values_list('id', flat=True)))
+    return render(request, 'onlinecourse/exam_result_bootstrap.html', {
+        'course': course, 'submission': submission,
+        **snapshot, 'legacy_grading': submission.grading_snapshot is None,
+    })
+
+
+def grade_exam(course, chosen_ids):
+    """Capture the assessment wording and scores at submission time."""
     questions = (Question.objects.filter(lesson__course=course)
                  .select_related('lesson')
                  .prefetch_related('choice_set')
@@ -145,13 +162,10 @@ def show_exam_result(request, course_id, submission_id):
         if is_correct:
             earned += question.grade
         results.append({
-            'question': question, 'selected': selected,
-            'correct_choices': correct, 'correct': is_correct,
+            'question': {'question_text': question.question_text},
+            'selected': [{'choice_text': choice.choice_text} for choice in selected],
+            'correct_choices': [{'choice_text': choice.choice_text} for choice in correct], 'correct': is_correct,
         })
     percentage = round(100 * earned / possible, 1) if possible else 0
-    return render(request, 'onlinecourse/exam_result_bootstrap.html', {
-        'course': course, 'submission': submission,
-        'results': results, 'earned_score': earned,
-        'total_score': possible, 'percentage': percentage,
-        'passed': possible > 0 and percentage >= 70,
-    })
+    return {'results': results, 'earned_score': earned, 'total_score': possible,
+            'percentage': percentage, 'passed': possible > 0 and percentage >= 70}

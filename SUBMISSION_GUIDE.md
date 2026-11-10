@@ -4,7 +4,7 @@ This fork implements the assessment feature in the original IBM Django OnlineCou
 
 ## Run on your own computer
 
-Requirements: Python 3.10+, pip and internet access to install packages.
+Requirements: Python 3.11+, pip and internet access to install packages.
 
 From the repository root:
 
@@ -25,7 +25,7 @@ The initial database migration is checked in. Run `makemigrations` only when cha
 
 Open http://127.0.0.1:8000/onlinecourse/ for courses or http://127.0.0.1:8000/admin/ for the admin interface.
 
-Development-only accounts created by seed_demo:
+Development-only accounts created by seed_demo on a fresh database (existing passwords and privileges are preserved):
 - Admin: demo_admin / admin12345
 - Student: demo_student / student12345
 

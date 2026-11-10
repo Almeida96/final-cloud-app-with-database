@@ -18,6 +18,7 @@
     </div>
   </div>
 
+  {% if legacy_grading %}<p>This older attempt predates saved grading snapshots; its score uses the current questions.</p>{% endif %}
   <h2 class="h4 mb-3">Exam results and feedback</h2>
   {% for result in results %}
     <article class="card border-0 shadow-sm mb-3">

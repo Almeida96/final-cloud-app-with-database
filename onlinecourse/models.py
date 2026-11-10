@@ -123,6 +123,7 @@ class Submission(models.Model):
     enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE)
     choices = models.ManyToManyField(Choice, blank=True)
     submitted_at = models.DateTimeField(auto_now_add=True)
+    grading_snapshot = models.JSONField(null=True, blank=True)
 
     def __str__(self):
         return f'{self.enrollment.user.username} - {self.enrollment.course.name} ({self.pk})'
